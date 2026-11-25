@@ -176,8 +176,19 @@ class Pseudonimizzatore:
                 problemi.append(f"valore noto ancora presente: {valore}")
         return problemi
 
-    def reidentifica(self, testo: str) -> str:
-        return SEGNAPOSTO.sub(lambda m: self.caveau.get(f"[{m.group(1)}]", m.group(0)), testo)
+    def reidentifica(self, dato):
+        """Rimette i valori veri in una stringa, o in tutte le stringhe di una lista o di un dizionario."""
+        if isinstance(dato, str):
+            return SEGNAPOSTO.sub(lambda m: self.caveau.get(f"[{m.group(1)}]", m.group(0)), dato)
+        if isinstance(dato, list):
+            return [self.reidentifica(x) for x in dato]
+        if isinstance(dato, dict):
+            return {k: self.reidentifica(v) for k, v in dato.items()}
+        return dato
+
+    def valori(self, categoria: str) -> list[str]:
+        """I valori veri di una categoria, es. tutti gli identificativi catastali trovati."""
+        return [v for k, v in self.caveau.items() if k.startswith(f"[{categoria}_")]
 
     def riepilogo(self) -> dict[str, int]:
         return dict(self._contatori)

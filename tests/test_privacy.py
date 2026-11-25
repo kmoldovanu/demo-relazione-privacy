@@ -1,7 +1,11 @@
+import io
 from pathlib import Path
 
 import pytest
+from docx import Document
 
+from privacy_ai.ai import come_testo
+from privacy_ai.documento import genera_relazione
 from privacy_ai.estrazione import leggi_pdf
 from privacy_ai.flusso import UscitaBloccata, elabora
 from privacy_ai.pseudonimizza import Pseudonimizzatore
@@ -33,11 +37,23 @@ def test_la_visura_non_va_all_ai(esiti):
     assert risultati[0].testo_inviato is None
 
 
-def test_la_risposta_torna_con_i_dati_veri(esiti):
+def test_la_bozza_torna_con_i_dati_veri(esiti):
     risultati, _ = esiti
-    finale = risultati[1].risposta_finale
+    finale = come_testo(risultati[1].bozza_finale)
     assert "Giraudo Elena" in finale
-    assert "[PERSONA_" not in finale
+    assert "[" not in finale
+    assert "[PERSONA_" in come_testo(risultati[1].bozza_ai)
+
+
+def test_relazione_word(esiti):
+    risultati, p = esiti
+    doc = Document(io.BytesIO(genera_relazione(risultati, p)))
+    testo = "\n".join(par.text for par in doc.paragraphs)
+    celle = " ".join(c.text for t in doc.tables for r in t.rows for c in r.cells)
+    assert "RELAZIONE DI ACCERTAMENTO" in testo
+    assert "Veranda chiusa" in testo
+    assert "Giraudo Elena" in celle and "GRDLNE78C54H727F" in celle  # dati veri dalla visura
+    assert "[" not in testo + celle  # nessun segnaposto rimasto
 
 
 def test_stesso_dato_stesso_segnaposto():

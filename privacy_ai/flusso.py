@@ -5,6 +5,8 @@
                                   no
                                   ▼
             pseudonimizzazione (locale) ──► controllo uscita ──► AI ──► reidentificazione (locale)
+                                                                              │
+                     relazione .docx  ◄── composizione con i dati veri (locale) ◄─┘
 """
 
 from __future__ import annotations
@@ -31,8 +33,8 @@ class Esito:
     documento: Documento
     visura: Visura | None = None
     testo_inviato: str | None = None
-    risposta_ai: str | None = None
-    risposta_finale: str | None = None
+    bozza_ai: dict | None = None  # bozza della relazione come esce dall'AI, con i segnaposto
+    bozza_finale: dict | None = None  # la stessa bozza con i dati veri, ricomposta in locale
     sostituzioni: dict[str, int] = field(default_factory=dict)
 
 
@@ -65,8 +67,8 @@ def elabora(
             _annota(file_registro, doc, "BLOCCATO", 0, esito.sostituzioni)
             raise UscitaBloccata(problemi)
 
-        esito.risposta_ai = ai.chiedi(esito.testo_inviato, modalita_ai)
-        esito.risposta_finale = p.reidentifica(esito.risposta_ai)
+        esito.bozza_ai = ai.chiedi(esito.testo_inviato, modalita_ai)
+        esito.bozza_finale = p.reidentifica(esito.bozza_ai)
         _annota(file_registro, doc, f"AI {modalita_ai}", len(esito.testo_inviato), esito.sostituzioni)
         esiti.append(esito)
     return esiti, p

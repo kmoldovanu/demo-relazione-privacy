@@ -10,6 +10,8 @@ from pathlib import Path
 
 import streamlit as st
 
+from privacy_ai.ai import come_testo
+from privacy_ai.documento import genera_relazione
 from privacy_ai.estrazione import Documento, leggi_pdf
 from privacy_ai.flusso import UscitaBloccata, elabora
 from privacy_ai.pseudonimizza import SEGNAPOSTO
@@ -120,11 +122,26 @@ for esito in esiti:
 
     sinistra, destra = st.columns(2)
     with sinistra:
-        st.markdown("**③ Risposta dell'AI** · contiene solo segnaposto")
-        st.markdown(evidenzia(esito.risposta_ai), unsafe_allow_html=True)
+        st.markdown("**③ Bozza scritta dall'AI** · contiene solo segnaposto")
+        st.markdown(evidenzia(come_testo(esito.bozza_ai)), unsafe_allow_html=True)
     with destra:
-        st.markdown("**④ Risposta finale** · dati veri rimessi in locale")
-        st.markdown(evidenzia(esito.risposta_finale, valori_veri), unsafe_allow_html=True)
+        st.markdown("**④ Bozza con i dati veri** · rimessi in locale")
+        st.markdown(evidenzia(come_testo(esito.bozza_finale), valori_veri), unsafe_allow_html=True)
+
+st.divider()
+st.subheader("📝 Relazione generata")
+st.markdown(
+    "Il documento Word si compone **in locale**: i dati catastali e gli intestatari arrivano dal parser della "
+    "visura, stato dei luoghi, criticità e verifiche dalla bozza dell'AI con i dati veri rimessi. "
+    "L'AI non vede mai il documento finito. È una bozza modificabile: il tecnico la rilegge e la firma."
+)
+st.download_button(
+    "⬇️ Scarica la relazione (.docx)",
+    genera_relazione(esiti, p),
+    file_name="relazione-accertamento.docx",
+    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    type="primary",
+)
 
 st.divider()
 sinistra, destra = st.columns(2)

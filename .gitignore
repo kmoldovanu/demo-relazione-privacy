@@ -3,3 +3,4 @@ __pycache__/
 registro/
 .venv/
 .streamlit/secrets.toml
+relazione-generata.docx

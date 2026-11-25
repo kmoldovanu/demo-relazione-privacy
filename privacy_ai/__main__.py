@@ -5,7 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
+from .ai import come_testo
+from .documento import genera_relazione
 from .estrazione import leggi_pdf
 from .flusso import UscitaBloccata, elabora
 
@@ -22,6 +25,7 @@ def main() -> int:
     parser.add_argument("pdf", nargs="+", help="uno o più PDF")
     parser.add_argument("--ai", choices=["simulata", "api"], default="simulata", help="dove mandare il testo")
     parser.add_argument("--ai-anche-su-visure", action="store_true", help="manda all'AI anche le visure")
+    parser.add_argument("--documento", default="relazione-generata.docx", help="dove salvare la relazione Word")
     args = parser.parse_args()
 
     documenti = [leggi_pdf(f) for f in args.pdf]
@@ -49,10 +53,14 @@ def main() -> int:
         titolo("3", f"Pseudonimizzazione: {esito.sostituzioni}", "in locale")
         titolo("4", "Testo inviato all'AI (è tutto quello che esce)", "esce" if args.ai == "api" else "simulato")
         print(esito.testo_inviato.strip())
-        titolo("5", "Risposta dell'AI, con i segnaposto", "esce" if args.ai == "api" else "simulato")
-        print(esito.risposta_ai)
-        titolo("6", "Risposta con i dati veri rimessi", "in locale")
-        print(esito.risposta_finale)
+        titolo("5", "Bozza scritta dall'AI, con i segnaposto", "esce" if args.ai == "api" else "simulato")
+        print(come_testo(esito.bozza_ai))
+        titolo("6", "Bozza con i dati veri rimessi", "in locale")
+        print(come_testo(esito.bozza_finale))
+
+    titolo("7", "Relazione Word composta con i dati veri", "in locale")
+    Path(args.documento).write_bytes(genera_relazione(esiti, p))
+    print(f"Salvata in {args.documento}")
 
     print(f"\n{GRASSETTO}Caveau (solo in memoria, cancellato ora):{FINE}")
     for segnaposto, valore in p.caveau.items():
