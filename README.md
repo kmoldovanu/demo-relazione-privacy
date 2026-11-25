@@ -95,6 +95,7 @@ L'app si pubblica gratis su [Streamlit Community Cloud](https://streamlit.io/clo
 | `privacy_ai/flusso.py` | Il flusso completo |
 | `app.py` | Interfaccia web (Streamlit) |
 | `esempi/genera_esempi.py` | Rigenera i PDF di esempio |
+| `esempi/da-caricare.pdf` | Un terzo documento (richiesta di un avvocato) da caricare nell'interfaccia |
 
 ## Limiti noti e prossimi passi
 

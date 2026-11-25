@@ -18,6 +18,7 @@ import json
 import os
 import re
 import urllib.request
+from collections import Counter
 
 ISTRUZIONI = (
     "Sei un assistente per uno studio di accertamenti immobiliari. Ricevi documenti in cui i dati "
@@ -49,7 +50,9 @@ def chiedi(testo: str, modalita: str = "simulata") -> str:
 
 
 def _simulata(testo: str) -> str:
-    persone = sorted(set(re.findall(r"\[PERSONA_\d+\]", testo)))
+    citazioni = Counter(re.findall(r"\[PERSONA_\d+\]", testo))
+    persone = sorted(citazioni)
+    principale = citazioni.most_common(1)[0][0] if citazioni else "la proprietà"  # la persona più citata
     luoghi = sorted(set(re.findall(r"\[(?:INDIRIZZO|IMMOBILE)_\d+\]", testo)))
     basso = testo.lower()
     criticita = [descr for parola, descr in SEGNALI.items() if parola in basso]
@@ -61,15 +64,17 @@ def _simulata(testo: str) -> str:
     )
     if persone:
         righe.append(f"   Persone citate: {', '.join(persone)}.")
-    if "sopralluogo" in basso:
+    if "effettuato il sopralluogo" in basso:
         righe.append("   Contiene l'esito di un sopralluogo con osservazioni sullo stato dei luoghi.")
+    elif "chiediamo" in basso or "richiesta" in basso:
+        righe.append("   È una richiesta di verifica prima di una compravendita o di una pratica.")
     righe.append("2) Possibili criticità")
     righe += [f"   - {c}" for c in criticita] or ["   - nessuna segnalata nel testo"]
     righe.append("3) Verifiche consigliate")
     if criticita:
         righe.append("   - confronto con i titoli edilizi in Comune e con la planimetria catastale")
         righe.append("   - se confermate, valutare l'aggiornamento catastale (DOCFA)")
-    righe.append(f"   - contattare {persone[0] if persone else 'la proprietà'} per la documentazione mancante")
+    righe.append(f"   - contattare {principale} per la documentazione mancante")
     return "\n".join(righe)
 
 
