@@ -46,12 +46,18 @@ st.title("🔒 Documenti immobiliari e AI, senza esporre dati personali")
 st.caption(
     "Demo con dati inventati. Il testo si estrae in locale; nomi, codici fiscali, indirizzi e contatti "
     "diventano segnaposto prima di arrivare all'AI e tornano veri solo alla fine, in locale. "
-    "Le visure, che hanno un formato fisso, si leggono senza AI."
+    "Le visure, che hanno un formato fisso, si leggono senza AI. "
+    "**Versione online di prova: non caricare documenti con dati reali.**"
 )
 
 with st.sidebar:
     st.header("Documenti")
-    caricati = st.file_uploader("Carica uno o più PDF", type="pdf", accept_multiple_files=True)
+    st.warning(
+        "**Non caricare documenti reali.** Questa versione online gira su un server pubblico di prova: "
+        "usa solo i PDF di esempio con dati inventati. Per provare documenti veri, la demo si installa "
+        "su un computer dell'azienda e funziona senza internet."
+    )
+    caricati = st.file_uploader("Carica uno o più PDF di prova", type="pdf", accept_multiple_files=True)
     if not caricati:
         st.info("Nessun file caricato: uso la visura e la relazione di esempio.")
     st.header("AI")
